@@ -1,0 +1,246 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Wedding Hall Booking System</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #fff0f5;
+            margin: 0;
+            text-align: center;
+        }
+
+        header {
+            background: #800040;
+            color: white;
+            padding: 25px;
+        }
+
+        nav {
+            background: #4d0026;
+            padding: 15px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 12px;
+            font-weight: bold;
+        }
+
+        .container {
+            padding: 25px;
+        }
+
+        .card {
+            background: white;
+            display: inline-block;
+            width: 200px;
+            padding: 20px;
+            margin: 12px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #aaa;
+        }
+
+        button {
+            background: #800040;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: white;
+            width: 90%;
+        }
+
+        th, td {
+            border: 1px solid #aaa;
+            padding: 10px;
+        }
+
+        th {
+            background: #800040;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Samhita's Online Wedding Hall Booking Management System</h1>
+    <p>Manage Customers, Halls, Bookings and Payments</p>
+</header>
+
+<nav>
+    <a href="index4.html">Home</a>
+    <a href="customers4.html">Customers</a>
+    <a href="halls4.html">Halls</a>
+    <a href="bookings4.html">Bookings</a>
+    <a href="payments4.html">Payments</a>
+    <a href="about4.html">About</a>
+</nav>
+
+<div class="container">
+
+    <h2>Welcome to Our System</h2>
+    <p>Book and manage wedding halls easily.</p>
+
+    <div class="card">
+        <h3>Customers</h3>
+        <p>Manage customer details.</p>
+        <a href="customers4.html">
+            <button>View Customers</button>
+        </a>
+    </div>
+
+    <div class="card">
+        <h3>Halls</h3>
+        <p>Manage wedding halls.</p>
+        <a href="halls4.html">
+            <button>View Halls</button>
+        </a>
+    </div>
+
+    <div class="card">
+        <h3>Bookings</h3>
+        <p>Manage hall bookings.</p>
+        <a href="bookings4.html">
+            <button>View Bookings</button>
+        </a>
+    </div>
+
+    <div class="card">
+        <h3>Payments</h3>
+        <p>Manage payment details.</p>
+        <a href="payments4.html">
+            <button>View Payments</button>
+        </a>
+    </div>
+
+    <h2>Customer Details</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Address</th>
+            </tr>
+        </thead>
+        <tbody id="customers"></tbody>
+    </table>
+
+    <h2>Wedding Hall Details</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Location</th>
+                <th>Capacity</th>
+                <th>Price</th>
+                <th>Facilities</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="halls"></tbody>
+    </table>
+
+    <h2>Booking Details</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Booking ID</th>
+                <th>Customer ID</th>
+                <th>Hall ID</th>
+                <th>Booking Date</th>
+                <th>Event Type</th>
+            </tr>
+        </thead>
+        <tbody id="bookings"></tbody>
+    </table>
+
+    <h2>Payment Details</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Payment ID</th>
+                <th>Booking ID</th>
+                <th>Amount</th>
+                <th>Payment Date</th>
+                <th>Payment Status</th>
+            </tr>
+        </thead>
+        <tbody id="payments"></tbody>
+    </table>
+
+</div>
+
+<script>
+    async function loadData() {
+
+        let customers = await fetch("/api/customers").then(res => res.json());
+        let halls = await fetch("/api/halls").then(res => res.json());
+        let bookings = await fetch("/api/bookings").then(res => res.json());
+        let payments = await fetch("/api/payments").then(res => res.json());
+
+        document.getElementById("customers").innerHTML =
+            customers.map(c => `
+                <tr>
+                    <td>${c.customer_id}</td>
+                    <td>${c.name}</td>
+                    <td>${c.email}</td>
+                    <td>${c.phone}</td>
+                    <td>${c.address}</td>
+                </tr>
+            `).join("");
+
+        document.getElementById("halls").innerHTML =
+            halls.map(h => `
+                <tr>
+                    <td>${h.hall_id}</td>
+                    <td>${h.location}</td>
+                    <td>${h.capacity}</td>
+                    <td>${h.price}</td>
+                    <td>${h.facilities}</td>
+                    <td>${h.status}</td>
+                </tr>
+            `).join("");
+
+        document.getElementById("bookings").innerHTML =
+            bookings.map(b => `
+                <tr>
+                    <td>${b.booking_id}</td>
+                    <td>${b.customer_id}</td>
+                    <td>${b.hall_id}</td>
+                    <td>${b.booking_date}</td>
+                    <td>${b.event_type}</td>
+                </tr>
+            `).join("");
+
+        document.getElementById("payments").innerHTML =
+            payments.map(p => `
+                <tr>
+                    <td>${p.payment_id}</td>
+                    <td>${p.booking_id}</td>
+                    <td>${p.amount}</td>
+                    <td>${p.payment_date}</td>
+                    <td>${p.payment_status}</td>
+                </tr>
+            `).join("");
+    }
+
+    loadData();
+</script>
+
+</body>
+</html>

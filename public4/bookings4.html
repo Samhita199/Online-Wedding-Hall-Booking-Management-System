@@ -1,0 +1,195 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bookings Management</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #fff0f5;
+            text-align: center;
+            margin: 0;
+        }
+
+        header {
+            background: #800040;
+            color: white;
+            padding: 20px;
+        }
+
+        nav {
+            background: #4d0026;
+            padding: 15px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 10px;
+        }
+
+        input {
+            padding: 10px;
+            margin: 8px;
+        }
+
+        button {
+            background: #800040;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        table {
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: white;
+            width: 80%;
+        }
+
+        th, td {
+            border: 1px solid #aaa;
+            padding: 10px;
+        }
+
+        th {
+            background: #800040;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Bookings Management</h1>
+</header>
+
+<nav>
+    <a href="index4.html">Home</a>
+    <a href="customers4.html">Customers</a>
+    <a href="halls4.html">Halls</a>
+    <a href="bookings4.html">Bookings</a>
+    <a href="payments4.html">Payments</a>
+    <a href="about4.html">About</a>
+</nav>
+
+<h2>Add Booking</h2>
+
+<form id="bookingForm">
+    <input type="text" id="customer_name"
+        placeholder="Customer Name" required>
+
+    <input type="text" id="hall_name"
+        placeholder="Hall Name" required>
+
+    <input type="date" id="booking_date" required>
+
+    <button type="submit">Add Booking</button>
+</form>
+
+<h2>Booking Records</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Booking ID</th>
+            <th>Customer Name</th>
+            <th>Hall Name</th>
+            <th>Booking Date</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody id="records"></tbody>
+</table>
+
+<script>
+    const form = document.getElementById("bookingForm");
+    const records = document.getElementById("records");
+
+    async function loadBookings() {
+        const response = await fetch("/api/bookings");
+        const data = await response.json();
+
+        records.innerHTML = "";
+
+        data.forEach(b => {
+            records.innerHTML += `
+                <tr>
+                    <td>${b.booking_id}</td>
+                    <td>${b.customer_name}</td>
+                    <td>${b.hall_name}</td>
+                    <td>${String(b.booking_date).substring(0, 10)}</td>
+                    <td>
+                        <button onclick="editBooking(${b.booking_id},
+                            '${b.customer_name}', '${b.hall_name}',
+                            '${String(b.booking_date).substring(0, 10)}')">
+                            Edit
+                        </button>
+
+                        <button onclick="deleteBooking(${b.booking_id})">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    form.addEventListener("submit", async function(e) {
+        e.preventDefault();
+
+        const booking = {
+            customer_name: document.getElementById("customer_name").value,
+            hall_name: document.getElementById("hall_name").value,
+            booking_date: document.getElementById("booking_date").value
+        };
+
+        await fetch("/api/bookings", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(booking)
+        });
+
+        form.reset();
+        loadBookings();
+    });
+
+    async function deleteBooking(id) {
+        if (confirm("Delete this booking?")) {
+            await fetch("/api/bookings/" + id, {
+                method: "DELETE"
+            });
+
+            loadBookings();
+        }
+    }
+
+    async function editBooking(id, name, hall, date) {
+        const customer_name = prompt("Enter customer name:", name);
+        const hall_name = prompt("Enter hall name:", hall);
+        const booking_date = prompt("Enter booking date (YYYY-MM-DD):", date);
+
+        if (customer_name && hall_name && booking_date) {
+            await fetch("/api/bookings/" + id, {
+                method: "PUT",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    customer_name,
+                    hall_name,
+                    booking_date
+                })
+            });
+
+            loadBookings();
+        }
+    }
+
+    loadBookings();
+</script>
+
+</body>
+</html>

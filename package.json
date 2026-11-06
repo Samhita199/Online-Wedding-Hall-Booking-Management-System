@@ -1,0 +1,14 @@
+
+{
+    "name": "wedding-hall-booking-system",
+    "version": "1.0.0",
+    "description": "Samhita's Online Wedding Hall Booking Management System",
+    "main": "app7A-07.js",
+    "scripts": {
+        "start": "node app7A-07.js"
+    },
+    "dependencies": {
+        "express": "^4.21.2",
+        "mysql2": "^3.14.0"
+    }
+}

@@ -1,0 +1,208 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Customer Management</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #fff5f5;
+            margin: 0;
+        }
+
+        header {
+            background: #7b243c;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        nav {
+            background: #431522;
+            padding: 15px;
+            text-align: center;
+        }
+
+        nav a {
+            color: white;
+            margin: 10px;
+            text-decoration: none;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        input {
+            padding: 10px;
+            margin: 5px;
+        }
+
+        button {
+            padding: 10px;
+            background: #7b243c;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+        }
+
+        th, td {
+            border: 1px solid #aaa;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #7b243c;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Customer Management</h1>
+</header>
+
+<nav>
+    <a href="index4.html">Home</a>
+    <a href="customers4.html">Customers</a>
+    <a href="halls4.html">Halls</a>
+    <a href="bookings4.html">Bookings</a>
+    <a href="payments4.html">Payments</a>
+    <a href="about4.html">About</a>
+</nav>
+
+<div class="container">
+
+    <h2>Enter Customer Details</h2>
+
+    <form id="form">
+        <input type="text" id="name" placeholder="Name" required>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="text" id="phone" placeholder="Phone" required>
+        <input type="text" id="address" placeholder="Address" required>
+
+        <button type="submit">Save Customer</button>
+    </form>
+
+    <h2>Customer Records</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody id="records"></tbody>
+    </table>
+
+</div>
+
+<script>
+
+let editId = null;
+let customerData = [];
+
+const form = document.getElementById("form");
+
+async function loadData() {
+    let res = await fetch("/api/customers");
+    customerData = await res.json();
+
+    records.innerHTML = customerData.map(c => `
+        <tr>
+            <td>${c.customer_id}</td>
+            <td>${c.name}</td>
+            <td>${c.email}</td>
+            <td>${c.phone}</td>
+            <td>${c.address}</td>
+            <td>
+                <button onclick="editData(${c.customer_id})">Edit</button>
+                <button onclick="deleteData(${c.customer_id})">Delete</button>
+            </td>
+        </tr>
+    `).join("");
+}
+
+form.onsubmit = async function(e) {
+    e.preventDefault();
+
+    let data = {
+        name: name.value,
+        email: email.value,
+        phone: phone.value,
+        address: address.value
+    };
+
+    let url = editId
+        ? "/api/customers/" + editId
+        : "/api/customers";
+
+    let method = editId ? "PUT" : "POST";
+
+    let res = await fetch(url, {
+        method: method,
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(data)
+    });
+
+    if (!res.ok) {
+        alert("Operation failed");
+        return;
+    }
+
+    alert("Customer saved successfully");
+
+    form.reset();
+    editId = null;
+    loadData();
+};
+
+function editData(id) {
+    let c = customerData.find(x => x.customer_id == id);
+
+    editId = id;
+
+    document.getElementById("name").value = c.name;
+    document.getElementById("email").value = c.email;
+    document.getElementById("phone").value = c.phone;
+    document.getElementById("address").value = c.address;
+}
+
+async function deleteData(id) {
+    if (confirm("Delete this customer?")) {
+        let res = await fetch("/api/customers/" + id, {
+            method: "DELETE"
+        });
+
+        if (!res.ok) {
+            alert("Delete failed");
+            return;
+        }
+
+        alert("Customer deleted");
+        loadData();
+    }
+}
+
+loadData();
+
+</script>
+
+</body>
+</html>

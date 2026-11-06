@@ -1,0 +1,216 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hall Management</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #fff5f5;
+            margin: 0;
+        }
+
+        header {
+            background: #7b243c;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        nav {
+            background: #431522;
+            padding: 15px;
+            text-align: center;
+        }
+
+        nav a {
+            color: white;
+            margin: 10px;
+            text-decoration: none;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        input, select {
+            padding: 10px;
+            margin: 5px;
+        }
+
+        button {
+            padding: 10px;
+            background: #7b243c;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+        }
+
+        th, td {
+            border: 1px solid #aaa;
+            padding: 10px;
+        }
+
+        th {
+            background: #7b243c;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Wedding Hall Management</h1>
+</header>
+
+<nav>
+    <a href="index4.html">Home</a>
+    <a href="customers4.html">Customers</a>
+    <a href="halls4.html">Halls</a>
+    <a href="bookings4.html">Bookings</a>
+    <a href="payments4.html">Payments</a>
+    <a href="about4.html">About</a>
+</nav>
+
+<div class="container">
+
+    <h2>Enter Hall Details</h2>
+
+    <form id="form">
+        <input type="text" id="location" placeholder="Location" required>
+        <input type="number" id="capacity" placeholder="Capacity" required>
+        <input type="number" id="price" placeholder="Price" required>
+        <input type="text" id="facilities" placeholder="Facilities" required>
+
+        <select id="status">
+            <option value="Available">Available</option>
+            <option value="Booked">Booked</option>
+        </select>
+
+        <button type="submit">Save Hall</button>
+    </form>
+
+    <h2>Hall Records</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Location</th>
+                <th>Capacity</th>
+                <th>Price</th>
+                <th>Facilities</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody id="records"></tbody>
+    </table>
+
+</div>
+
+<script>
+
+let editId = null;
+let hallData = [];
+
+const form = document.getElementById("form");
+
+async function loadData() {
+    let res = await fetch("/api/halls");
+    hallData = await res.json();
+
+    records.innerHTML = hallData.map(h => `
+        <tr>
+            <td>${h.hall_id}</td>
+            <td>${h.location}</td>
+            <td>${h.capacity}</td>
+            <td>${h.price}</td>
+            <td>${h.facilities}</td>
+            <td>${h.status}</td>
+            <td>
+                <button onclick="editData(${h.hall_id})">Edit</button>
+                <button onclick="deleteData(${h.hall_id})">Delete</button>
+            </td>
+        </tr>
+    `).join("");
+}
+
+form.onsubmit = async function(e) {
+    e.preventDefault();
+
+    let data = {
+        location: document.getElementById("location").value,
+        capacity: document.getElementById("capacity").value,
+        price: document.getElementById("price").value,
+        facilities: document.getElementById("facilities").value,
+        status: document.getElementById("status").value
+    };
+
+    let url = editId
+        ? "/api/halls/" + editId
+        : "/api/halls";
+
+    let method = editId ? "PUT" : "POST";
+
+    let res = await fetch(url, {
+        method: method,
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(data)
+    });
+
+    if (!res.ok) {
+        alert("Operation failed");
+        return;
+    }
+
+    alert("Hall saved successfully");
+
+    form.reset();
+    editId = null;
+    loadData();
+};
+
+function editData(id) {
+    let h = hallData.find(x => x.hall_id == id);
+
+    editId = id;
+
+    document.getElementById("location").value = h.location;
+    document.getElementById("capacity").value = h.capacity;
+    document.getElementById("price").value = h.price;
+    document.getElementById("facilities").value = h.facilities;
+    document.getElementById("status").value = h.status;
+}
+
+async function deleteData(id) {
+    if (confirm("Delete this hall?")) {
+        let res = await fetch("/api/halls/" + id, {
+            method: "DELETE"
+        });
+
+        if (!res.ok) {
+            alert("Delete failed");
+            return;
+        }
+
+        alert("Hall deleted successfully");
+        loadData();
+    }
+}
+
+loadData();
+
+</script>
+
+</body>
+</html>
